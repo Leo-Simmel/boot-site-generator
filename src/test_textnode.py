@@ -1,4 +1,5 @@
 import unittest
+
 from textnode import TextNode, TextType
 
 
@@ -8,16 +9,16 @@ class TestTextNode(unittest.TestCase):
         node2 = TextNode("This is a text node", TextType.BOLD_TEXT)
         self.assertEqual(node, node2)
 
-    def url_none(self):
+    def test_url_none(self):
         node = TextNode("This is a text node", TextType.BOLD_TEXT)
-        self.asserEqual(node.url, None)
+        self.assertEqual(node.url, None)
 
-    def different_text_type(self):
+    def test_different_text_type(self):
         node = TextNode("This is a text node", TextType.BOLD_TEXT)
         node2 = TextNode("This is a text node", TextType.PLAIN_TEXT)
         self.assertNotEqual(node, node2)
 
-    def different_text(self):
+    def test_different_text(self):
         node = TextNode("This is a text node", TextType.BOLD_TEXT)
         node2 = TextNode("This is also a text node", TextType.BOLD_TEXT)
         self.assertNotEqual(node, node2)
