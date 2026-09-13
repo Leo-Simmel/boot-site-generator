@@ -203,6 +203,30 @@ class TestInlineMarkdown(unittest.TestCase):
 
 
 # test image, link extraction
+    def test_link_does_not_match_image(self):
+        matches = extract_markdown_links(
+            "[link1](url1) then ![img1](url2) thenn [link2](url3)"
+        )
+        self.assertListEqual(
+            [
+                ("link1", "url1"),
+                ("link2", "url3")
+            ],
+            matches
+        )
+
+    def test_image_does_not_match_link(self):
+        matches = extract_markdown_images(
+            "![img1](url1) then [link](url2) thenn ![img2](url3)"
+        )
+        self.assertListEqual(
+            [
+                ("img1", "url1"),
+                ("img2", "url3")
+            ],
+            matches
+        )
+
 # stolen, can't be bothered to test regex
     def test_extract_markdown_images(self):
         matches = extract_markdown_images(
