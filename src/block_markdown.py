@@ -2,6 +2,10 @@ import re
 from enum import Enum
 
 from htmlnode import HTMLNode
+from inline_markdown import text_to_textnodes
+from leafnode import LeafNode
+from parentnode import ParentNode
+from textnode import text_node_to_html_node
 
 
 class BlockType(Enum):
@@ -21,6 +25,7 @@ def markdown_to_blocks(markdown: str) -> list[str]:
 
 
 HEADING_PATTERN = re.compile(r"^#{1,6} (.+)$")
+HEADING_INDENT = re.compile(r"(#{1,6})")
 CODE_PATTERN = re.compile(r"^`{3}\n(.*)`{3}$", re.DOTALL)
 QUOTE_PATTERN = re.compile(r"^(?:>.*\n?)+$")
 QUOTE_CONTENT = re.compile(r"^>(.*)", re.MULTILINE)
@@ -70,3 +75,71 @@ def block_to_block_type_with_content(block: str) -> tuple[BlockType, str | list[
             return BlockType.OLIST, OLIST_CONTENT.findall(block)
 
     return BlockType.PARAGRAPH, " ".join(line.strip() for line in block.split())
+
+def text_to_children(text: str) -> list[HTMLNode]:
+    return [
+        text_node_to_html_node(node)
+        for node in text_to_textnodes(text)
+    ]
+
+def markdown_to_html_node(markdown) -> HTMLNode:
+    main_children = []
+    for block in markdown_to_blocks(markdown):
+        type, content = block_to_block_type_with_content(block)
+        match type:
+            case BlockType.CODE:
+                assert isinstance(content, str)
+                code_node = LeafNode("code", content)
+                preformatted = ParentNode("pre", [code_node])
+                main_children.append(preformatted)
+                # special case, don't process inline markdown
+                continue
+            case BlockType.PARAGRAPH:
+                assert isinstance(content, str)
+                children = text_to_children(content)
+                main_children.append(
+                    ParentNode("p", children)
+                )
+            case BlockType.HEADING:
+                assert isinstance(content, str)
+                children = text_to_children(content)
+                # TODO: make heading be based on number of hash signs
+                match = HEADING_INDENT.match(block)
+                assert match is not None
+                level = match.end(1) - match.start(1)
+                main_children.append(
+                    ParentNode(f"h{level}", children)
+                )
+            case BlockType.QUOTE:
+                assert isinstance(content, str)
+                children = text_to_children(content)
+                main_children.append(
+                    ParentNode("blockquote", children)
+                )
+            case BlockType.ULIST:
+                assert isinstance(content, list)
+                list_node = ParentNode("ul",
+                    [
+                        ParentNode("li",
+                            text_to_children(line)
+                        )
+                        for line in content
+                    ]
+                )
+                main_children.append(list_node)
+            case BlockType.OLIST:
+                assert isinstance(content, list)
+                list_node = ParentNode("ol",
+                    [
+                        ParentNode("li",
+                            text_to_children(line)
+                        )
+                        for line in content
+                    ]
+                )
+                main_children.append(list_node)
+
+    if len(main_children) == 0:
+        return LeafNode(None, "")
+
+    return ParentNode("div", main_children)
