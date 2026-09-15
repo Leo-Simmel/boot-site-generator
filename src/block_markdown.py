@@ -74,7 +74,7 @@ def block_to_block_type_with_content(block: str) -> tuple[BlockType, str | list[
         if all(str(num) == match for num, match in enumerate(indeces, start=1)):
             return BlockType.OLIST, OLIST_CONTENT.findall(block)
 
-    return BlockType.PARAGRAPH, " ".join(line.strip() for line in block.split())
+    return BlockType.PARAGRAPH, " ".join(line.strip() for line in block.split("\n"))
 
 def text_to_children(text: str) -> list[HTMLNode]:
     return [
