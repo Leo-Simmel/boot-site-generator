@@ -4,6 +4,7 @@ from block_markdown import (
     BlockType,
     block_to_block_type,
     block_to_block_type_with_content,
+    extract_title,
     markdown_to_blocks,
     markdown_to_html_node,
 )
@@ -157,6 +158,45 @@ the **same** even with inline stuff
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
+
+# test extract title
+    def test_eq(self):
+        actual = extract_title("# This is a title")
+        self.assertEqual(actual, "This is a title")
+
+    def test_eq_double(self):
+        actual = extract_title(
+            """
+# This is a title
+
+# This is a second title that should be ignored
+"""
+        )
+        self.assertEqual(actual, "This is a title")
+
+    def test_eq_long(self):
+        actual = extract_title(
+            """
+# title
+
+this is a bunch
+
+of text
+
+- and
+- a
+- list
+"""
+        )
+        self.assertEqual(actual, "title")
+
+    def test_none(self):
+        extract_no_title = lambda: extract_title(
+            """
+no title
+"""
+            )
+        self.assertRaises(ValueError, extract_no_title)
 
 if __name__ == "__main__":
     unittest.main()

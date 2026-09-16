@@ -35,6 +35,13 @@ OLIST_PATTERN = re.compile(r"^(?:\d+\. .*\n?)+$")
 OLIST_INDEX = re.compile(r"^(\d+)\. ", re.MULTILINE)
 OLIST_CONTENT = re.compile(r"^\d+\. (.*)", re.MULTILINE)
 
+def extract_title(markdown: str) -> str:
+    match = re.search(r"^# (.*)", markdown, re.MULTILINE)
+    if match is None:
+        raise ValueError("expected title in markdown")
+    return match.group(1).strip()
+
+
 def block_to_block_type(block: str) -> BlockType:
     if HEADING_PATTERN.search(block):
         return BlockType.HEADING
