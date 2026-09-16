@@ -6,12 +6,17 @@ from copystatic import copy_files_recursive
 from gencontent import generate_pages_recursive
 
 dir_path_static = "./static"
-dir_path_public = "./public"
+dir_path_public = "./docs"
 dir_path_content = "./content"
 template_path = "./template.html"
 
 
 def main():
+    if len(sys.argv) < 2:
+        basepath = "/"
+    else:
+        basepath = sys.argv[1]
+
     print("Deleting public directory...")
     if os.path.exists(dir_path_public):
         shutil.rmtree(dir_path_public)
@@ -24,7 +29,8 @@ def main():
         generate_pages_recursive(
                 dir_path_content,
                 template_path,
-                dir_path_public
+                dir_path_public,
+                basepath
             )
     except Exception as e:
         print(f"Couldn't generate page: {e}")
