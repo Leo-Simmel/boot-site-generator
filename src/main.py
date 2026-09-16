@@ -3,7 +3,7 @@ import shutil
 import sys
 
 from copystatic import copy_files_recursive
-from gencontent import generate_page
+from gencontent import generate_pages_recursive
 
 dir_path_static = "./static"
 dir_path_public = "./public"
@@ -21,10 +21,10 @@ def main():
 
     print("Generating page...")
     try:
-        generate_page(
-                os.path.join(dir_path_content, "index.md"),
+        generate_pages_recursive(
+                dir_path_content,
                 template_path,
-                os.path.join(dir_path_public, "index.html"),
+                dir_path_public
             )
     except Exception as e:
         print(f"Couldn't generate page: {e}")
